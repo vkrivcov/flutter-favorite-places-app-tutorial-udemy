@@ -1,6 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_favorite_places_app_tutorial_udemy/models/place_location.dart';
 import 'package:flutter_favorite_places_app_tutorial_udemy/providers/user_places.dart';
 import 'package:flutter_favorite_places_app_tutorial_udemy/widgets/image_input.dart';
+import 'package:flutter_favorite_places_app_tutorial_udemy/widgets/location_input.dart';
+import 'package:flutter_favorite_places_app_tutorial_udemy/widgets/map_with_location_picker.dart';
+import 'package:flutter_favorite_places_app_tutorial_udemy/widgets/map_with_marker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AddPlaceScreen extends ConsumerStatefulWidget {
@@ -14,14 +20,23 @@ class AddPlaceScreen extends ConsumerStatefulWidget {
 
 class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
   final _titleController = TextEditingController();
+  File? _selectedImage;
+  PlaceLocation? _selectedLocation;
+  MapWithMarker? _detectedMap;
 
   void savePlace() {
     final enteredTitle = _titleController.text;
-    if (enteredTitle.isEmpty) {
+    if (enteredTitle.isEmpty ||
+        _selectedImage == null ||
+        _selectedLocation == null ||
+        _detectedMap == null
+    ) {
       return;
     }
 
-    ref.read(userPlacesProvider.notifier).addPlace(enteredTitle);
+    ref
+        .read(userPlacesProvider.notifier)
+        .addPlace(enteredTitle, _selectedImage!, _selectedLocation!, _detectedMap);
     Navigator.of(context).pop();
   }
 
@@ -54,7 +69,24 @@ class _AddPlaceScreenState extends ConsumerState<AddPlaceScreen> {
             // NOTE: image input (there is no default one so we are using our
             // own custom one)
             const SizedBox(height: 10),
-            ImageInput(),
+
+            // pass the function that will store us an image
+            ImageInput(
+              onPickImage: (image) {
+                _selectedImage = image;
+              },
+            ),
+            const SizedBox(height: 10),
+
+            // get location from the parent
+            LocationInput(
+              onSelectLocation: (location) {
+                _selectedLocation = location;
+              },
+              onDetectedMap: (map) {
+                _detectedMap = map;
+              },
+            ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               icon: Icon(Icons.add),

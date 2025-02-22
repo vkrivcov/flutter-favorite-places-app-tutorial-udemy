@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageInput extends StatefulWidget {
-  const ImageInput({super.key});
+  const ImageInput({super.key, required this.onPickImage});
+
+  final void Function(File pickedImage) onPickImage;
 
   @override
   State<ImageInput> createState() => _ImageInputState();
@@ -36,6 +38,9 @@ class _ImageInputState extends State<ImageInput> {
     setState(() {
       _selectedImage = File(pickedImage.path);
     });
+
+    // pass an image to the function
+    widget.onPickImage(_selectedImage!);
   }
 
   @override
@@ -53,6 +58,8 @@ class _ImageInputState extends State<ImageInput> {
       // to monitor all kinds of gestures
       content = GestureDetector(
         onTap: _takePicture,
+
+        // this is how we can set image file
         child: Image.file(
           _selectedImage!,
         
